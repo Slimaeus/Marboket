@@ -4,12 +4,13 @@ namespace Marboket.Domain.Entities;
 
 public class ItemUnit : BaseEntity<int>
 {
-    public ItemUnit(string name, string? alias) : this(name)
+    public ItemUnit(int id, string name, string? alias) : this(id, name)
     {
         Alias = alias;
     }
-    public ItemUnit(string name) : this()
+    public ItemUnit(int id, string name) : this()
     {
+        Id = id;
         Name = name;
     }
     public ItemUnit()

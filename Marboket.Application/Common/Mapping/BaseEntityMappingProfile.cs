@@ -2,7 +2,8 @@
 
 namespace Marboket.Application.Common.Mapping;
 
-public abstract class BaseEntityMappingProfile<TEntity, TDto, TCreateDto, TUpdateDto> : Profile
+public abstract class BaseEntityMappingProfile<TEntity, TDto, TCreateDto, TUpdateDto>
+    : Profile
 {
     public BaseEntityMappingProfile()
     {

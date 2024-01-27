@@ -4,5 +4,6 @@ using Marboket.Domain.Entities;
 
 namespace Marboket.Application.Products;
 
-public sealed class MappingProfile : BaseEntityMappingProfile<Product, ProductDto, CreateProductDto, UpdateProductDto>;
+public sealed class MappingProfile
+    : BaseEntityMappingProfile<Product, ProductDto, CreateProductDto, UpdateProductDto>;
 

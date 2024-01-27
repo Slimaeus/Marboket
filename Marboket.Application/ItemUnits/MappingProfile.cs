@@ -4,4 +4,5 @@ using Marboket.Domain.Entities;
 
 namespace Marboket.Application.ItemUnits;
 
-public sealed class MappingProfile : BaseEntityMappingProfile<ItemUnit, ItemUnitDto, CreateItemUnitDto, UpdateItemUnitDto>;
+public sealed class MappingProfile
+    : BaseEntityMappingProfile<ItemUnit, ItemUnitDto, CreateItemUnitDto, UpdateItemUnitDto>;

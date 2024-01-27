@@ -14,10 +14,10 @@ public sealed class ItemUnitEndpoints(RouteGroupBuilder group) : EntityEndpoints
             await context.ItemUnits.ExecuteDeleteAsync();
             await context.ItemUnits.AddRangeAsync(
                 [
-                    new("bao"),
-                    new("lít", "l"),
-                    new("kí", "kg"),
-                    new("gram", "g"),
+                    new(1, "gram", "g"),
+                    new(2, "kí", "kg"),
+                    new(3, "lít", "l"),
+                    new(4, "bao"),
                 ]);
 
             await context.SaveChangesAsync();
