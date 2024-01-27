@@ -14,8 +14,8 @@ public class Product : BaseEntity
     public virtual ICollection<ProductCategory> ProductCategories { get; set; } = new HashSet<ProductCategory>();
 
     public void AddPrice(int itemUnitId, double amount, double price)
-    {
-        Prices.Add(new Price { ItemUnitId = itemUnitId, UnitAmount = amount, PricePerUnit = price });
-    }
+        => Prices.Add(new(itemUnitId, amount, price));
+    public void AddPhoto(string url)
+        => Photos.Add(new(url));
 }
 

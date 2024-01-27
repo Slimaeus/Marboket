@@ -9,5 +9,7 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
     protected override void UpdateEntityBeforeAdd(Product entity, CreateProductDto request)
     {
         entity.AddPrice(request.ItemUnitId, request.UnitAmount, request.Price);
+        if (!string.IsNullOrEmpty(request.PhotoUrl))
+            entity.AddPhoto(request.PhotoUrl);
     }
 }
