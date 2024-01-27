@@ -6,7 +6,6 @@ public class Photo : BaseEntity<string>
 {
     public Photo()
     {
-
         Id = Guid.NewGuid().ToString();
     }
     public Photo(string url)

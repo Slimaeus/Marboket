@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Marboket.Application\Marboket.Application.csproj" />
     <ProjectReference Include="..\Marboket.Domain\Marboket.Domain.csproj" />
+    <ProjectReference Include="..\Marboket.Infrastructure\Marboket.Infrastructure.csproj" />
     <ProjectReference Include="..\Marboket.Persistence\Marboket.Persistence.csproj" />
   </ItemGroup>
 

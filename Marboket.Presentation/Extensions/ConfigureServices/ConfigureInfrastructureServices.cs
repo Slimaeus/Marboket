@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using CloudinaryDotNet;
+using Marboket.Infrastructure.Photos;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -26,6 +29,20 @@ public static class ConfigureInfrastructureServices
                     ClockSkew = TimeSpan.FromSeconds(5)
                 };
             });
+
+        services.Configure<CloudinarySettings>(configuration.GetSection("Cloudinary"));
+        services.AddSingleton(sp =>
+        {
+            var settings = sp.GetRequiredService<IOptions<CloudinarySettings>>().Value;
+
+            return new Cloudinary(new Account(
+                settings.CloudName,
+                settings.ApiKey,
+                settings.ApiSecret
+            ));
+        });
+        services.AddScoped<IPhotoService, CloudinaryService>();
+
         return services;
     }
 }
