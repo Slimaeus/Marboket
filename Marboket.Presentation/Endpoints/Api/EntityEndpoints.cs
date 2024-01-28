@@ -1,7 +1,7 @@
-﻿using Ardalis.Result;
-using AutoMapper;
+﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Marboket.Domain.Common;
+using Marboket.Domain.Common.Collections;
 using Marboket.Persistence;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +12,6 @@ namespace Marboket.Presentation.Endpoints.Api;
 public abstract class EntityEndpoints<TId, TEntity, TDto> : IEndpoints
     where TEntity : class, IEntity<TId>
 {
-
     public EntityEndpoints(string groupName, RouteGroupBuilder apiGroup)
     {
         var group = apiGroup.MapGroup(groupName)
@@ -41,17 +40,20 @@ public abstract class EntityEndpoints<TId, TEntity, TDto> : IEndpoints
 
     public virtual void MapEndpoints() { }
 
-    private Ok<Result<IQueryable<TDto>>> HandleGetList(
+    private async Task<Ok<IPagedList<TDto>>> HandleGetList(
         [FromServices] ApplicationDbContext context,
         [FromServices] IMapper mapper)
     {
-        var entities = context.Set<TEntity>()
+        IList<TDto> entities = context.Set<TEntity>()
             .AsSplitQuery()
-            .ProjectTo<TDto>(mapper.ConfigurationProvider);
-        return TypedResults.Ok(Result.Success(entities));
+            .ProjectTo<TDto>(mapper.ConfigurationProvider)
+            .ToList();
+
+        var pagedList = entities.ToPagedList(1, 10, await context.Set<TEntity>().CountAsync());
+        return TypedResults.Ok(pagedList);
     }
 
-    private async Task<Results<Ok<Result<TDto>>, NotFound>> HandleGet(
+    private async Task<Results<Ok<TDto>, NotFound>> HandleGet(
         [FromRoute] TId id,
         [FromServices] ApplicationDbContext context,
         [FromServices] IMapper mapper,
@@ -65,10 +67,8 @@ public abstract class EntityEndpoints<TId, TEntity, TDto> : IEndpoints
         {
             return TypedResults.NotFound();
         }
-        return TypedResults.Ok(Result.Success(mapper.Map<TDto>(entityDto)));
+        return TypedResults.Ok(mapper.Map<TDto>(entityDto));
     }
-
-
 }
 
 public abstract class EntityEndpoints<TId, TEntity, TDto, TCreateDto, TUpdateDto> : EntityEndpoints<TId, TEntity, TDto>
@@ -82,7 +82,7 @@ public abstract class EntityEndpoints<TId, TEntity, TDto, TCreateDto, TUpdateDto
         IdGroup.MapDelete("", HandleDelete);
 
     }
-    private async Task<Created<Result<TDto>>> HandleCreate(
+    private async Task<Created<TDto>> HandleCreate(
         [FromBody] TCreateDto request,
         [FromServices] ApplicationDbContext context,
         [FromServices] IMapper mapper,
@@ -100,7 +100,7 @@ public abstract class EntityEndpoints<TId, TEntity, TDto, TCreateDto, TUpdateDto
             .ProjectTo<TDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(cancellationToken);
 
-        return TypedResults.Created($"api/{GroupName}", Result.Success(entityDto!));
+        return TypedResults.Created($"api/{GroupName}", entityDto);
     }
     private async Task<Results<NotFound, NoContent>> HandleUpdate(
         [FromBody] TUpdateDto request,
@@ -119,7 +119,7 @@ public abstract class EntityEndpoints<TId, TEntity, TDto, TCreateDto, TUpdateDto
         await context.SaveChangesAsync(cancellationToken);
         return TypedResults.NoContent();
     }
-    private async Task<Results<NotFound, Ok<Result<TDto>>>> HandleDelete(
+    private async Task<Results<NotFound, Ok<TDto>>> HandleDelete(
         [FromRoute] TId id,
         [FromServices] ApplicationDbContext context,
         [FromServices] IMapper mapper,
@@ -135,7 +135,7 @@ public abstract class EntityEndpoints<TId, TEntity, TDto, TCreateDto, TUpdateDto
         context.Remove(entity);
         await context.SaveChangesAsync(cancellationToken);
 
-        return TypedResults.Ok(Result.Success(mapper.Map<TDto>(entity)));
+        return TypedResults.Ok(mapper.Map<TDto>(entity));
     }
     protected virtual void UpdateEntityBeforeAdd(TEntity entity, TCreateDto request) { }
 }

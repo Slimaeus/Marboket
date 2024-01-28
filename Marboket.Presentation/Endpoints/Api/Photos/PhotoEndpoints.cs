@@ -1,5 +1,4 @@
-﻿using Ardalis.Result;
-using AutoMapper;
+﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Marboket.Application.Photos.Dtos;
 using Marboket.Domain.Entities;
@@ -25,7 +24,7 @@ public class PhotoEndpoints(RouteGroupBuilder apiGroup)
         IdGroup.MapDelete("", HandleRemovePhoto);
     }
 
-    private async Task<Results<Created<Result<PhotoDto>>, NotFound, BadRequest>> HandleCreatePhoto(
+    private async Task<Results<Created<PhotoDto>, NotFound, BadRequest>> HandleCreatePhoto(
         [FromForm] Guid productId,
         [FromForm] IFormFile file,
         [FromServices] ApplicationDbContext context,
@@ -57,10 +56,10 @@ public class PhotoEndpoints(RouteGroupBuilder apiGroup)
             .ProjectTo<PhotoDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(cancellationToken);
 
-        return TypedResults.Created($"api/{GroupName}", Result.Success(photoDto!));
+        return TypedResults.Created($"api/{GroupName}", photoDto);
     }
 
-    private async Task<Results<Ok<Result<string>>, NotFound, BadRequest<string>>> HandleRemovePhoto(
+    private async Task<Results<Ok<string>, NotFound, BadRequest<string>>> HandleRemovePhoto(
         [FromRoute] string id,
         [FromServices] ApplicationDbContext context,
         [FromServices] IMapper mapper,
@@ -86,6 +85,6 @@ public class PhotoEndpoints(RouteGroupBuilder apiGroup)
         context.Remove(photo);
         await context.SaveChangesAsync(cancellationToken);
 
-        return TypedResults.Ok(Result.Success(photo.Url));
+        return TypedResults.Ok(photo.Url);
     }
 }
