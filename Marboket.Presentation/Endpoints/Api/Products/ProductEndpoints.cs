@@ -32,19 +32,21 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
         [FromServices] IPhotoService photoService,
         CancellationToken cancellationToken)
     {
-        var (isSuccess, data) = await photoService.AddPhoto(file, "marboket/products");
-        if (!isSuccess || data is null)
-        {
-            return TypedResults.BadRequest();
-        }
-
         var product = await context.Products.FindAsync([id], cancellationToken: cancellationToken);
         if (product is null)
         {
             return TypedResults.NotFound();
         }
 
-        product.AddPhoto(data.Value.Item1, data.Value.Item2);
+        var (isSuccess, data) = await photoService.AddPhoto(file, "marboket/products");
+        if (!isSuccess || data is null)
+        {
+            return TypedResults.BadRequest();
+        }
+
+        var (photoId, url) = data.Value;
+
+        product.AddPhoto(photoId, url);
 
         await context.SaveChangesAsync(cancellationToken);
 
