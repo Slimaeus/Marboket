@@ -11,6 +11,7 @@ public sealed class ApplicationDbContext(DbContextOptions options)
 
     public DbSet<Category> Categories { get; set; }
     public DbSet<ItemUnit> ItemUnits { get; set; }
+    public DbSet<Photo> Photos { get; set; }
     public DbSet<Price> Prices { get; set; }
     public DbSet<Product> Products { get; set; }
 
