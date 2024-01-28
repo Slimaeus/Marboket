@@ -15,8 +15,4 @@
     <ProjectReference Include="..\Marboket.Domain\Marboket.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Photos\Interfaces\" />
-  </ItemGroup>
-
 </Project>

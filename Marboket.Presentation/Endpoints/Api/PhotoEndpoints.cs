@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Marboket.Application.Photos.Dtos;
+using Marboket.Domain.Entities;
 using Marboket.Infrastructure.Photos;
 using Marboket.Persistence;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -7,15 +9,13 @@ using System.Net;
 
 namespace Marboket.Presentation.Endpoints.Api;
 
-public class PhotoEndpoints : IEndpoints
+public class PhotoEndpoints(RouteGroupBuilder apiGroup) : EntityEndpoints<string, Photo, PhotoDto>("Photos", apiGroup)
 {
-    public PhotoEndpoints(RouteGroupBuilder apiGroup)
+    public override void MapEndpoints()
     {
-        var group = apiGroup.MapGroup("Photos")
-            .WithTags("Photos");
+        base.MapEndpoints();
 
-        var idGroup = group.MapGroup("{id}");
-        idGroup.MapDelete("", HandleRemovePhoto);
+        IdGroup.MapDelete("", HandleRemovePhoto);
     }
 
     private async Task<Results<Ok<string>, NotFound, BadRequest<string>>> HandleRemovePhoto(
