@@ -14,8 +14,8 @@ public sealed class CloudinaryService(Cloudinary cloudinary) : IPhotoService
             var uploadParams = new ImageUploadParams
             {
                 Folder = folder,
-                File = new FileDescription(file.FileName, stream),
-                Transformation = new Transformation().Height(500).Width(500).Crop("crop")
+                File = new FileDescription(file.FileName, stream)
+                //Transformation = new Transformation().Height(500).Width(500).Crop("crop")
             };
 
             var uploadResult = await cloudinary.UploadAsync(uploadParams);

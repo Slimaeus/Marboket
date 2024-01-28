@@ -8,9 +8,13 @@ public class Photo : BaseEntity<string>
     {
         Id = Guid.NewGuid().ToString();
     }
-    public Photo(string url)
+    public Photo(string url) : this(Guid.NewGuid().ToString(), url)
     {
-        Id = Guid.NewGuid().ToString();
+    }
+
+    public Photo(string id, string url)
+    {
+        Id = id;
         Url = url;
     }
     public string Url { get; set; } = string.Empty;

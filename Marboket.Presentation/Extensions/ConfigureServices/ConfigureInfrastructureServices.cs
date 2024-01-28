@@ -15,6 +15,7 @@ public static class ConfigureInfrastructureServices
         ArgumentException.ThrowIfNullOrEmpty(tokenKey);
         SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(tokenKey));
 
+        services.AddAntiforgery();
         services.AddAuthorization();
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -44,5 +45,13 @@ public static class ConfigureInfrastructureServices
         services.AddScoped<IPhotoService, CloudinaryService>();
 
         return services;
+    }
+
+    public static WebApplication UseInfrastructureServices(this WebApplication app)
+    {
+        app.UseAntiforgery();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        return app;
     }
 }

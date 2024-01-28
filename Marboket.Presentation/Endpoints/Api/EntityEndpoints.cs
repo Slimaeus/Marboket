@@ -47,6 +47,7 @@ public abstract class EntityEndpoints<TId, TEntity, TDto, TCreateDto, TUpdateDto
         [FromServices] IMapper mapper)
     {
         var entities = context.Set<TEntity>()
+            .AsSplitQuery()
             .ProjectTo<TDto>(mapper.ConfigurationProvider);
         return TypedResults.Ok(entities);
     }

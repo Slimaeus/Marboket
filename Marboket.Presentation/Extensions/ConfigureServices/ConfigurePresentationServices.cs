@@ -1,4 +1,5 @@
 ﻿using Marboket.Presentation.Endpoints.Api;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
@@ -58,6 +59,13 @@ public static class ConfigurePresentationServices
         }
 
         // --- Map Endpoints
+        app.MapGet("antiforgery/token", (IAntiforgery forgeryService, HttpContext context) =>
+        {
+            var tokens = forgeryService.GetAndStoreTokens(context);
+            var xsrfToken = tokens.RequestToken!;
+            return TypedResults.Content(xsrfToken, "text/plain");
+        });
+        //.RequireAuthorization();
         var endpointClasses = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes())
             .Where(x => typeof(IEndpoints).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract)
             .ToList();

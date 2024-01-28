@@ -10,5 +10,6 @@ builder.Services.AddPresentationServices();
 var app = builder.Build();
 
 app.UsePresentationServices();
+app.UseInfrastructureServices();
 
 app.Run();

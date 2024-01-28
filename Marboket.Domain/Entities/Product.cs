@@ -17,5 +17,14 @@ public class Product : BaseEntity
         => Prices.Add(new(itemUnitId, amount, price));
     public void AddPhoto(string url)
         => Photos.Add(new(url));
+    public void AddPhoto(string id, string url)
+        => Photos.Add(new(id, url));
+    public Photo? RemovePhoto(string id)
+    {
+        var photo = Photos.SingleOrDefault(p => p.Id == id);
+        if (photo is null) return null;
+        Photos.Remove(photo);
+        return photo;
+    }
 }
 
