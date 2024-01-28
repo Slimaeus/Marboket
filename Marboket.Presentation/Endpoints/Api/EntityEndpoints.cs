@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Marboket.Application.Common.Models;
 using Marboket.Domain.Common;
 using Marboket.Domain.Common.Collections;
 using Marboket.Persistence;
@@ -41,15 +42,23 @@ public abstract class EntityEndpoints<TId, TEntity, TDto> : IEndpoints
     public virtual void MapEndpoints() { }
 
     private async Task<Ok<IPagedList<TDto>>> HandleGetList(
+        [AsParameters] PaginationParams @params,
         [FromServices] ApplicationDbContext context,
         [FromServices] IMapper mapper)
     {
-        IList<TDto> entities = context.Set<TEntity>()
+        var source = context.Set<TEntity>().AsQueryable();
+        if (@params.PageSize > 0)
+        {
+            var skipCount = ((@params.PageNumber ?? 1) - 1) * @params.PageSize.Value;
+            source = skipCount < 0 ? source : source.Skip(skipCount).Take(@params.PageSize.Value);
+        }
+
+        IList<TDto> entities = source
             .AsSplitQuery()
             .ProjectTo<TDto>(mapper.ConfigurationProvider)
             .ToList();
 
-        var pagedList = entities.ToPagedList(1, 10, await context.Set<TEntity>().CountAsync());
+        var pagedList = entities.ToPagedList(@params.PageNumber, @params.PageSize, await context.Set<TEntity>().CountAsync());
         return TypedResults.Ok(pagedList);
     }
 
