@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Marboket.Presentation.Endpoints.Api.ItemUnits;
 
-public sealed class ItemUnitEndpoints(RouteGroupBuilder group) : EntityEndpoints<int, ItemUnit, ItemUnitDto, CreateItemUnitDto, UpdateItemUnitDto>("Units", group)
+public sealed class ItemUnitEndpoints(RouteGroupBuilder group)
+    : EntityEndpoints<int, ItemUnit, ItemUnitDto, CreateItemUnitDto, UpdateItemUnitDto>("Units", group)
 {
     public override void MapEndpoints()
     {

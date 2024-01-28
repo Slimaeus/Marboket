@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Ardalis.Result;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Marboket.Application.Photos.Dtos;
 using Marboket.Domain.Entities;
@@ -11,7 +12,8 @@ using System.Net;
 
 namespace Marboket.Presentation.Endpoints.Api.Photos;
 
-public class PhotoEndpoints(RouteGroupBuilder apiGroup) : EntityEndpoints<string, Photo, PhotoDto>("Photos", apiGroup)
+public class PhotoEndpoints(RouteGroupBuilder apiGroup)
+    : EntityEndpoints<string, Photo, PhotoDto>("Photos", apiGroup)
 {
     public override void MapEndpoints()
     {
@@ -23,7 +25,7 @@ public class PhotoEndpoints(RouteGroupBuilder apiGroup) : EntityEndpoints<string
         IdGroup.MapDelete("", HandleRemovePhoto);
     }
 
-    private async Task<Results<Created<PhotoDto>, NotFound, BadRequest>> HandleCreatePhoto(
+    private async Task<Results<Created<Result<PhotoDto>>, NotFound, BadRequest>> HandleCreatePhoto(
         [FromForm] Guid productId,
         [FromForm] IFormFile file,
         [FromServices] ApplicationDbContext context,
@@ -55,10 +57,10 @@ public class PhotoEndpoints(RouteGroupBuilder apiGroup) : EntityEndpoints<string
             .ProjectTo<PhotoDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(cancellationToken);
 
-        return TypedResults.Created($"api/{GroupName}", photoDto);
+        return TypedResults.Created($"api/{GroupName}", Result.Success(photoDto!));
     }
 
-    private async Task<Results<Ok<string>, NotFound, BadRequest<string>>> HandleRemovePhoto(
+    private async Task<Results<Ok<Result<string>>, NotFound, BadRequest<string>>> HandleRemovePhoto(
         [FromRoute] string id,
         [FromServices] ApplicationDbContext context,
         [FromServices] IMapper mapper,
@@ -84,6 +86,6 @@ public class PhotoEndpoints(RouteGroupBuilder apiGroup) : EntityEndpoints<string
         context.Remove(photo);
         await context.SaveChangesAsync(cancellationToken);
 
-        return TypedResults.Ok(photo.Url);
+        return TypedResults.Ok(Result.Success(photo.Url));
     }
 }

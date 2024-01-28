@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Ardalis.Result;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Marboket.Application.Prices.Dtos;
 using Marboket.Application.Products.Dtos;
@@ -27,7 +28,7 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
         pricesGroup.MapDelete("{priceId:guid}", HandleRemovePrice);
     }
 
-    private async Task<Results<Ok<ProductDto>, BadRequest, NotFound>> HandleAddPhoto(
+    private async Task<Results<Ok<Result<ProductDto>>, BadRequest, NotFound>> HandleAddPhoto(
         [FromRoute] Guid id,
         [FromForm] IFormFile file,
         [FromServices] ApplicationDbContext context,
@@ -58,10 +59,10 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
             .ProjectTo<ProductDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(cancellationToken);
 
-        return TypedResults.Ok(productDto);
+        return TypedResults.Ok(Result.Success(productDto!));
     }
 
-    private async Task<Results<Ok<string>, NotFound, BadRequest<string>>> HandleRemovePhoto(
+    private async Task<Results<Ok<Result<string>>, NotFound, BadRequest<string>>> HandleRemovePhoto(
         [FromRoute] Guid id,
         [FromRoute] string photoId,
         [FromServices] ApplicationDbContext context,
@@ -99,10 +100,10 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return TypedResults.Ok(photo.Url);
+        return TypedResults.Ok(Result.Success(photo.Url));
     }
 
-    private async Task<Results<Ok<ProductDto>, NotFound, BadRequest>> HandleAddPrice(
+    private async Task<Results<Ok<Result<ProductDto>>, NotFound, BadRequest>> HandleAddPrice(
         [FromRoute] Guid id,
         [FromBody] CreatePriceDto request,
         [FromServices] ApplicationDbContext context,
@@ -130,11 +131,10 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
             .Where(x => x.Id.Equals(product.Id))
             .ProjectTo<ProductDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(cancellationToken);
-
-        return TypedResults.Ok(productDto);
+        return TypedResults.Ok(Result.Success(productDto!));
     }
 
-    private async Task<Results<Ok<PriceDto>, NotFound, BadRequest>> HandleRemovePrice(
+    private async Task<Results<Ok<Result<PriceDto>>, NotFound, BadRequest>> HandleRemovePrice(
         [FromRoute] Guid id,
         [FromRoute] Guid priceId,
         [FromServices] ApplicationDbContext context,
@@ -158,7 +158,7 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return TypedResults.Ok(mapper.Map<PriceDto>(price));
+        return TypedResults.Ok(Result.Success(mapper.Map<PriceDto>(price)));
     }
 
     protected override void UpdateEntityBeforeAdd(Product entity, CreateProductDto request)
