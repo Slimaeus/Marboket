@@ -26,5 +26,12 @@ public class Product : BaseEntity
         Photos.Remove(photo);
         return photo;
     }
+    public Price? RemovePrice(Guid id)
+    {
+        var price = Prices.SingleOrDefault(p => p.Id == id);
+        if (price is null) return null;
+        Prices.Remove(price);
+        return price;
+    }
 }
 
