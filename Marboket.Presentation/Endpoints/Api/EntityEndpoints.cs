@@ -41,22 +41,36 @@ public abstract class EntityEndpoints<TId, TEntity, TDto> : IEndpoints
 
     public virtual void MapEndpoints() { }
 
+    public virtual IQueryable<TEntity> Filter(IQueryable<TEntity> source, string searchString)
+        => source;
+
     private async Task<Ok<IPagedList<TDto>>> HandleGetList(
         [AsParameters] PaginationParams @params,
         [FromServices] ApplicationDbContext context,
         [FromServices] IMapper mapper)
     {
         var source = context.Set<TEntity>().AsQueryable();
+
+        if (!string.IsNullOrEmpty(@params.SearchString))
+        {
+            source = Filter(source, @params.SearchString);
+        }
+
         if (@params.PageSize > 0)
         {
             var skipCount = ((@params.PageNumber ?? 1) - 1) * @params.PageSize.Value;
-            source = skipCount < 0 ? source : source.Skip(skipCount).Take(@params.PageSize.Value);
+            source = skipCount < 0
+                ? source
+                : source
+                .OrderBy(x => x.Id)
+                .Skip(skipCount)
+                .Take(@params.PageSize.Value);
         }
 
-        IList<TDto> entities = source
+        IList<TDto> entities = await source
             .AsSplitQuery()
             .ProjectTo<TDto>(mapper.ConfigurationProvider)
-            .ToList();
+            .ToListAsync();
 
         var pagedList = entities.ToPagedList(@params.PageNumber, @params.PageSize, await context.Set<TEntity>().CountAsync());
         return TypedResults.Ok(pagedList);

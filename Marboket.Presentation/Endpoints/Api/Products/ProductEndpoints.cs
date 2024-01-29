@@ -26,6 +26,8 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
         pricesGroup.MapPost("", HandleAddPrice);
         pricesGroup.MapDelete("{priceId:guid}", HandleRemovePrice);
     }
+    public override IQueryable<Product> Filter(IQueryable<Product> source, string searchString)
+        => source.Where(x => x.Name.ToLower().Contains(searchString.ToLower()));
 
     private async Task<Results<Ok<ProductDto>, BadRequest, NotFound>> HandleAddPhoto(
         [FromRoute] Guid id,

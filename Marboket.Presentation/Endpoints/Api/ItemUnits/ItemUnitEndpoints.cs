@@ -8,6 +8,8 @@ namespace Marboket.Presentation.Endpoints.Api.ItemUnits;
 public sealed class ItemUnitEndpoints(RouteGroupBuilder group)
     : EntityEndpoints<int, ItemUnit, ItemUnitDto, CreateItemUnitDto, UpdateItemUnitDto>("Units", group)
 {
+    public override IQueryable<ItemUnit> Filter(IQueryable<ItemUnit> source, string searchString)
+        => source.Where(x => x.Name.ToLower().Contains(searchString.ToLower()));
     public override void MapEndpoints()
     {
         EntityGroup.MapPost("seed", async (ApplicationDbContext context) =>
