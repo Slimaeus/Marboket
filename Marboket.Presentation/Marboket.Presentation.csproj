@@ -28,4 +28,8 @@
     <ProjectReference Include="..\Marboket.Persistence\Marboket.Persistence.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Endpoints\Api\Users\" />
+  </ItemGroup>
+
 </Project>

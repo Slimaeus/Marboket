@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Marboket.Domain\Marboket.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Users\" />
+  </ItemGroup>
+
 </Project>
