@@ -10,7 +10,7 @@ public abstract class BaseEntityMappingProfile<TEntity, TDto, TCreateDto, TUpdat
         CreateMap<TEntity, TDto>();
         CreateMap<TCreateDto, TEntity>();
         CreateMap<TUpdateDto, TEntity>()
-            .ForAllMembers(options => options.Condition((src, des, srcValue, desValue) => srcValue != null));
+            .ForAllMembers(options => options.Condition((src, des, srcValue, desValue) => srcValue is not null));
     }
 }
 

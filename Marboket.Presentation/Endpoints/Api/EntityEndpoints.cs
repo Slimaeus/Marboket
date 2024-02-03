@@ -69,6 +69,7 @@ public abstract class EntityEndpoints<TId, TEntity, TDto> : IEndpoints
 
         IList<TDto> entities = await source
             .AsSplitQuery()
+            .AsNoTracking()
             .ProjectTo<TDto>(mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -84,6 +85,7 @@ public abstract class EntityEndpoints<TId, TEntity, TDto> : IEndpoints
     {
         var entityDto = await context.Set<TEntity>()
             .Where(x => x.Id != null && x.Id.Equals(id))
+            .AsNoTracking()
             .ProjectTo<TDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(cancellationToken);
         if (entityDto is null)
@@ -120,12 +122,13 @@ public abstract class EntityEndpoints<TId, TEntity, TDto, TCreateDto, TUpdateDto
 
         var entityDto = await context.Set<TEntity>()
             .Where(x => x.Id != null && x.Id.Equals(entity.Id))
+            .AsNoTracking()
             .ProjectTo<TDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(cancellationToken);
 
         return TypedResults.Created($"api/{GroupName}", entityDto);
     }
-    private async Task<Results<NotFound, NoContent>> HandleUpdate(
+    private async Task<Results<NotFound, Ok<TDto>>> HandleUpdate(
         [FromBody] TUpdateDto request,
         [FromServices] ApplicationDbContext context,
         [FromServices] IMapper mapper, [FromRoute] TId id,
@@ -140,7 +143,14 @@ public abstract class EntityEndpoints<TId, TEntity, TDto, TCreateDto, TUpdateDto
         }
         mapper.Map(request, entity);
         await context.SaveChangesAsync(cancellationToken);
-        return TypedResults.NoContent();
+
+        var entityDto = await context.Set<TEntity>()
+            .Where(x => x.Id != null && x.Id.Equals(entity.Id))
+            .AsNoTracking()
+            .ProjectTo<TDto>(mapper.ConfigurationProvider)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return TypedResults.Ok(entityDto);
     }
     private async Task<Results<NotFound, Ok<TDto>>> HandleDelete(
         [FromRoute] TId id,
@@ -151,6 +161,7 @@ public abstract class EntityEndpoints<TId, TEntity, TDto, TCreateDto, TUpdateDto
         var entity = await context
             .Set<TEntity>()
             .FindAsync([id], cancellationToken: cancellationToken);
+
         if (entity is null)
         {
             return TypedResults.NotFound();

@@ -46,17 +46,13 @@ public static class ConfigurePresentationServices
     }
     public static WebApplication UsePresentationServices(this WebApplication app)
     {
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                options.EnableFilter();
-                options.EnableTryItOutByDefault();
-                options.EnablePersistAuthorization();
-            });
-        }
+            options.EnableFilter();
+            options.EnableTryItOutByDefault();
+            options.EnablePersistAuthorization();
+        });
 
         // --- Map Endpoints
         app.MapGet("antiforgery/token", (IAntiforgery forgeryService, HttpContext context) =>

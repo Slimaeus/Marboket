@@ -57,13 +57,14 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
 
         var productDto = await context.Products
             .Where(x => x.Id.Equals(product.Id))
+            .AsNoTracking()
             .ProjectTo<ProductDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(cancellationToken);
 
         return TypedResults.Ok(productDto);
     }
 
-    private async Task<Results<Ok<string>, NotFound, BadRequest<string>>> HandleRemovePhoto(
+    private async Task<Results<Ok<ProductDto>, NotFound, BadRequest<string>>> HandleRemovePhoto(
         [FromRoute] Guid id,
         [FromRoute] string photoId,
         [FromServices] ApplicationDbContext context,
@@ -101,7 +102,13 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return TypedResults.Ok(photo.Url);
+        var productDto = await context.Products
+            .Where(x => x.Id.Equals(product.Id))
+            .AsNoTracking()
+            .ProjectTo<ProductDto>(mapper.ConfigurationProvider)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return TypedResults.Ok(productDto);
     }
 
     private async Task<Results<Ok<ProductDto>, NotFound, BadRequest>> HandleAddPrice(
@@ -130,8 +137,10 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
 
         var productDto = await context.Products
             .Where(x => x.Id.Equals(product.Id))
+            .AsNoTracking()
             .ProjectTo<ProductDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(cancellationToken);
+
         return TypedResults.Ok(productDto);
     }
 
