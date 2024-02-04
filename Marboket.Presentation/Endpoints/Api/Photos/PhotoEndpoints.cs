@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Marboket.Application.Photos.Dtos;
+using Marboket.Application.Products.Dtos;
 using Marboket.Domain.Entities;
 using Marboket.Infrastructure.Photos;
 using Marboket.Persistence;
@@ -24,6 +25,8 @@ public class PhotoEndpoints(RouteGroupBuilder apiGroup)
         IdGroup.MapDelete("", HandleRemovePhoto);
     }
 
+    private static string _photoPath = "marboket/products";
+
     private async Task<Results<Created<PhotoDto>, NotFound, BadRequest>> HandleCreatePhoto(
         [FromForm] Guid productId,
         [FromForm] IFormFile file,
@@ -39,13 +42,15 @@ public class PhotoEndpoints(RouteGroupBuilder apiGroup)
             return TypedResults.NotFound();
         }
 
-        var (isSuccess, data) = await photoService.AddPhoto(request.File, "marboket/products");
+        var (isSuccess, data) = await photoService.AddPhoto(request.File, _photoPath);
         if (!isSuccess || data is null)
         {
             return TypedResults.BadRequest();
         }
 
-        var (photoId, url) = data.Value;
+        var (path, url) = data.Value;
+
+        var photoId = path.Replace(_photoPath + "/", "");
 
         product.AddPhoto(photoId, url);
 
@@ -59,24 +64,27 @@ public class PhotoEndpoints(RouteGroupBuilder apiGroup)
         return TypedResults.Created($"api/{GroupName}", photoDto);
     }
 
-    private async Task<Results<Ok<string>, NotFound, BadRequest<string>>> HandleRemovePhoto(
-        [FromRoute] string id,
-        [FromServices] ApplicationDbContext context,
-        [FromServices] IMapper mapper,
-        [FromServices] IPhotoService photoService,
-        CancellationToken cancellationToken)
+    private async Task<Results<Ok<ProductDto>, NotFound<string>, BadRequest<string>>> HandleRemovePhoto(
+    [FromRoute] string id,
+    [FromServices] ApplicationDbContext context,
+    [FromServices] IMapper mapper,
+    [FromServices] IPhotoService photoService,
+    CancellationToken cancellationToken)
     {
         var decodedPhotoId = WebUtility.UrlDecode(id);
+
 
         var photo = await context.Photos
             .FindAsync([decodedPhotoId], cancellationToken);
 
         if (photo is null)
         {
-            return TypedResults.NotFound();
+            return TypedResults.NotFound($"Photo is null {decodedPhotoId}");
         }
 
-        var (isSuccess, message) = await photoService.DeletePhoto(decodedPhotoId);
+        var fullPath = _photoPath + "/" + decodedPhotoId;
+
+        var (isSuccess, message) = await photoService.DeletePhoto(fullPath);
         if (!isSuccess || message is null)
         {
             return TypedResults.BadRequest(message);
@@ -85,6 +93,12 @@ public class PhotoEndpoints(RouteGroupBuilder apiGroup)
         context.Remove(photo);
         await context.SaveChangesAsync(cancellationToken);
 
-        return TypedResults.Ok(photo.Url);
+        var productDto = await context.Products
+            .Where(x => x.Id.Equals(photo.ProductId))
+            .AsNoTracking()
+            .ProjectTo<ProductDto>(mapper.ConfigurationProvider)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return TypedResults.Ok(productDto);
     }
 }

@@ -28,6 +28,7 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
     }
     public override IQueryable<Product> Filter(IQueryable<Product> source, string searchString)
         => source.Where(x => x.Name.ToLower().Contains(searchString.ToLower()));
+    private static string _photoPath = "marboket/products";
 
     private async Task<Results<Ok<ProductDto>, BadRequest, NotFound>> HandleAddPhoto(
         [FromRoute] Guid id,
@@ -49,7 +50,9 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
             return TypedResults.BadRequest();
         }
 
-        var (photoId, url) = data.Value;
+        var (path, url) = data.Value;
+
+        var photoId = path.Replace(_photoPath + "/", "");
 
         product.AddPhoto(photoId, url);
 
@@ -93,9 +96,9 @@ public sealed class ProductEndpoints(RouteGroupBuilder group)
             return TypedResults.BadRequest(message);
         }
 
-        var photo = product.RemovePhoto(decodedPhotoId);
+        var isRemoveSuccess = product.RemovePhoto(decodedPhotoId);
 
-        if (photo is null)
+        if (!isRemoveSuccess)
         {
             return TypedResults.NotFound();
         }

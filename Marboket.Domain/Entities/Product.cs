@@ -19,12 +19,12 @@ public class Product : BaseEntity
         => Photos.Add(new(url));
     public void AddPhoto(string id, string url)
         => Photos.Add(new(id, url));
-    public Photo? RemovePhoto(string id)
+    public bool RemovePhoto(string id)
     {
         var photo = Photos.SingleOrDefault(p => p.Id == id);
-        if (photo is null) return null;
+        if (photo is null) return false;
         Photos.Remove(photo);
-        return photo;
+        return true;
     }
     public Price? RemovePrice(Guid id)
     {
